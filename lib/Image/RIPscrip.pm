@@ -4,17 +4,18 @@ use Moose;
 
 use Math::Base36 ();
 use Graphics::Color::RGB;
-use Graphics::Primitive::Canvas;
-use Graphics::Primitive::Operation::Fill;
-use Graphics::Primitive::Paint::Solid;
-use Graphics::Primitive::Operation::Stroke;
 use Graphics::Primitive::Brush;
+use Graphics::Primitive::Canvas;
 use Graphics::Primitive::Driver::Cairo;
-use Geometry::Primitive::Polygon;
-use Geometry::Primitive::Point;
-use Geometry::Primitive::Ellipse;
-use Geometry::Primitive::Bezier;
+use Graphics::Primitive::Operation::Fill;
+use Graphics::Primitive::Operation::Stroke;
+use Graphics::Primitive::Paint::Solid;
 use Geometry::Primitive::Arc;
+use Geometry::Primitive::Bezier;
+use Geometry::Primitive::Circle;
+use Geometry::Primitive::Ellipse;
+use Geometry::Primitive::Point;
+use Geometry::Primitive::Polygon;
 
 our $VERSION = '0.01';
 
