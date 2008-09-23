@@ -375,8 +375,7 @@ sub render {
     $options->{ format } ||= 'png';
 
     my $canvas = $self->canvas;
-    my $driver = Graphics::Primitive::Driver::Cairo->new(
-        format => $options->{ format } );
+    my $driver = Graphics::Primitive::Driver::Cairo->new( %$options );
 
     $driver->prepare( $canvas );
     $driver->finalize( $canvas );
