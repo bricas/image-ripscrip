@@ -1,4 +1,4 @@
-use inc::Module::Install 0.77;
+use inc::Module::Install 1.01;
 
 if ( -e 'MANIFEST.SKIP' ) {
     system( 'pod2text lib/Image/RIPscrip.pm > README' );
