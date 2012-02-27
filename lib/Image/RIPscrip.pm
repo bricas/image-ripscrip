@@ -2,70 +2,13 @@ package Image::RIPscrip;
 
 use Moose;
 
-use Math::Base36 ();
-use Graphics::Color::RGB;
-use Graphics::Primitive::Brush;
-use Graphics::Primitive::Canvas;
-use Graphics::Primitive::Driver::Cairo;
-use Graphics::Primitive::Operation::Fill;
-use Graphics::Primitive::Operation::Stroke;
-use Graphics::Primitive::Paint::Solid;
-use Geometry::Primitive::Arc;
-use Geometry::Primitive::Bezier;
-use Geometry::Primitive::Circle;
-use Geometry::Primitive::Ellipse;
-use Geometry::Primitive::Point;
-use Geometry::Primitive::Polygon;
-
 our $VERSION = '0.01';
 
-my @fullpal = map {
-    my @d = split( //, sprintf( '%06b', $_ ) );
-    {   red   => oct( "0b$d[ 3 ]$d[ 0 ]" ) / 3,
-        green => oct( "0b$d[ 4 ]$d[ 1 ]" ) / 3,
-        blue  => oct( "0b$d[ 5 ]$d[ 2 ]" ) / 3,
-    }
-} 0 .. 63;
-
-my @defaultpal
-    = map { $fullpal[ $_ ] } qw( 0 1 2 3 4 5 20 7 56 57 58 59 60 61 62 63 );
-my @dash_patterns = ( undef, [ 2, 2 ], [ 3, 4, 3, 6 ], [ 3, 5, 3, 6 ], );
-my $pi = atan2( 1, 1 ) * 4;
+use Math::Base36 ();
+use GD ();
+use Carp 'croak';
 
 my %command_map = ( '=' => 'eq' );
-
-has 'colors' => (
-    isa     => 'ArrayRef',
-    is      => 'ro',
-    default => sub {
-        [ map { Graphics::Color::RGB->new( %$_ ) } @defaultpal ];
-    }
-);
-
-has 'fill_color' => ( isa => 'Int', is => 'rw', default => 0 );
-
-has 'draw_color' => ( isa => 'Int', is => 'rw', default => 0 );
-
-has 'draw_thickness' => ( isa => 'Int', is => 'rw', default => 1 );
-
-has 'dash_pattern' => (
-    isa     => 'Maybe[ArrayRef]',
-    is      => 'rw',
-    default => sub { $dash_patterns[ 0 ] }
-);
-
-has 'canvas' => (
-    isa     => 'Object',
-    is      => 'ro',
-    default => sub {
-        Graphics::Primitive::Canvas->new(
-            width            => 640,
-            height           => 350,
-            background_color => shift->colors->[ 0 ]
-        );
-    },
-    lazy => 1
-);
 
 sub read {
     my ( $self, $fh ) = @_;
@@ -100,6 +43,91 @@ sub read {
 
     close( $fh );
 }
+
+sub _get_fh {
+    my ( $file ) = @_;
+
+    my $fh = $file;
+    if ( !ref $fh ) {
+        undef $fh;
+        open $fh, '<', $file    ## no critic (InputOutput::RequireBriefOpen)
+            or croak "Unable to open '$file': $!";
+    }
+
+    binmode( $fh );
+    return $fh;
+}
+
+sub render {
+}
+
+no Moose;
+
+__PACKAGE__->meta->make_immutable;
+
+1;
+
+__END__
+
+use Graphics::Color::RGB;
+use Graphics::Primitive::Brush;
+use Graphics::Primitive::Canvas;
+use Graphics::Primitive::Driver::Cairo;
+use Graphics::Primitive::Operation::Fill;
+use Graphics::Primitive::Operation::Stroke;
+use Graphics::Primitive::Paint::Solid;
+use Geometry::Primitive::Arc;
+use Geometry::Primitive::Bezier;
+use Geometry::Primitive::Circle;
+use Geometry::Primitive::Ellipse;
+use Geometry::Primitive::Point;
+use Geometry::Primitive::Polygon;
+
+my @fullpal = map {
+    my @d = split( //, sprintf( '%06b', $_ ) );
+    {   red   => oct( "0b$d[ 3 ]$d[ 0 ]" ) / 3,
+        green => oct( "0b$d[ 4 ]$d[ 1 ]" ) / 3,
+        blue  => oct( "0b$d[ 5 ]$d[ 2 ]" ) / 3,
+    }
+} 0 .. 63;
+
+my @defaultpal
+    = map { $fullpal[ $_ ] } qw( 0 1 2 3 4 5 20 7 56 57 58 59 60 61 62 63 );
+my @dash_patterns = ( undef, [ 2, 2 ], [ 3, 4, 3, 6 ], [ 3, 5, 3, 6 ], );
+my $pi = atan2( 1, 1 ) * 4;
+
+has 'colors' => (
+    isa     => 'ArrayRef',
+    is      => 'ro',
+    default => sub {
+        [ map { Graphics::Color::RGB->new( %$_ ) } @defaultpal ];
+    }
+);
+
+has 'fill_color' => ( isa => 'Int', is => 'rw', default => 0 );
+
+has 'draw_color' => ( isa => 'Int', is => 'rw', default => 0 );
+
+has 'draw_thickness' => ( isa => 'Int', is => 'rw', default => 1 );
+
+has 'dash_pattern' => (
+    isa     => 'Maybe[ArrayRef]',
+    is      => 'rw',
+    default => sub { $dash_patterns[ 0 ] }
+);
+
+has 'canvas' => (
+    isa     => 'Object',
+    is      => 'ro',
+    default => sub {
+        Graphics::Primitive::Canvas->new(
+            width            => 640,
+            height           => 350,
+            background_color => shift->colors->[ 0 ]
+        );
+    },
+    lazy => 1
+);
 
 sub _command_p {    # filled polygon
     my ( $self, @args ) = @_;
@@ -354,19 +382,6 @@ sub _stroke {
     $self->canvas->do( $stroke_op );
 }
 
-sub _get_fh {
-    my ( $file ) = @_;
-
-    my $fh = $file;
-    if ( !ref $fh ) {
-        undef $fh;
-        open $fh, $file;
-    }
-
-    binmode( $fh );
-    return $fh;
-}
-
 sub render {
     my $self    = shift;
     my $file    = shift;
@@ -383,9 +398,3 @@ sub render {
 
     $driver->write( $file );
 }
-
-no Moose;
-
-__PACKAGE__->meta->make_immutable;
-
-1;
