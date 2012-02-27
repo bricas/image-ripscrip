@@ -9,6 +9,7 @@ use GD ();
 use Carp 'croak';
 
 my %command_map = ( '=' => 'eq' );
+my %arg_map = ( '=' => '(..)(....)(..)' );
 
 sub read {
     my ( $self, $fh ) = @_;
@@ -34,8 +35,7 @@ sub read {
             my $code = $self->can( "_command_${method}" );
             next unless $code;
 
-            my @args = _parse_args( $args,
-                ( $command =~ m{=} ) ? '(..)(....)(..)' : undef );
+            my @args = _parse_args( $args, $arg_map{ $command } );
             $code->( $self, @args );
         }
 
@@ -56,6 +56,13 @@ sub _get_fh {
 
     binmode( $fh );
     return $fh;
+}
+
+sub _parse_args {
+    my $args = shift;
+    my $format = shift || '(..)';
+    return
+        map { Math::Base36::decode_base36( $_ ) . '' } $args =~ m{$format}gs;
 }
 
 sub render {
