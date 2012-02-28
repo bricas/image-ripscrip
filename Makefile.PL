@@ -1,4 +1,4 @@
-use inc::Module::Install 1.01;
+use inc::Module::Install 1.05;
 
 if ( -e 'MANIFEST.SKIP' ) {
     system( 'pod2text lib/Image/RIPscrip.pm > README' );
@@ -10,10 +10,7 @@ name 'Image-RIPscrip';
 all_from 'lib/Image/RIPscip.pm';
 
 requires 'Moose' => '0.51';
-requires 'Graphics::Primitive::Driver::Cairo';
-requires 'Graphics::Primitive';
-requires 'Geometry::Primitive';
-requires 'Graphics::Color';
+requires 'GD';
 requires 'Math::Base36';
 
 test_requires 'Test::More';
