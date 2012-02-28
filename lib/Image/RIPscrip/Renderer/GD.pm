@@ -278,7 +278,7 @@ sub _command_1C {   # copy to clipboard
     my $w = $args[ 2 ] - $args[ 0 ];
     my $h = $args[ 3 ] - $args[ 1 ];
 
-    next if $w < 0 or $h < 0;
+    return if $w < 0 or $h < 0;
 
     my $clip = GD::Image->new( $w, $h );
     $clip->copy( $state->{ canvas }, 0, 0, @args[ 0..1 ], $w, $h );

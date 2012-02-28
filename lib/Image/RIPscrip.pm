@@ -26,8 +26,7 @@ sub read {
             $line =~ s{\\\s*$}{};
             $line .= <$fh>;
         }
-        chomp( $line );
-
+        $line =~ s{[\r\n]+$}{};
         $line =~ s{^(\!\|)}{};
         next unless $1 && $1 eq '!|';
 
@@ -35,7 +34,7 @@ sub read {
             my ( $command, $args ) = $command_line =~ m{^(\d*\D)(.*)}s;
 
             last if $command eq '#';
-#            warn "[$command] [$args]";
+            # use Data::Dump 'dump'; warn dump( $command, $args );
             next unless $command;
 
             my @args = _parse_args( $args, $arg_map{ $command } );
