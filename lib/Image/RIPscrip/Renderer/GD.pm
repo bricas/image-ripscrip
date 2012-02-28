@@ -133,7 +133,7 @@ sub _command_c {    # set draw color
     $self->state->{ draw_color } = $args[ 0 ];
 }
 
-sub _command_eq {
+sub _command_eq {   # set line style
     my ( $self, @args ) = @_;
     my $state = $self->state;
 
@@ -144,6 +144,11 @@ sub _command_eq {
     }
 
     $state->{ canvas }->setThickness( $args[ 2 ] );
+}
+
+sub _command_s {    # custom fill pattern
+    my ( $self, @args ) = @_;
+    my $state = $self->state;
 }
 
 sub _command_X {    # put pixel

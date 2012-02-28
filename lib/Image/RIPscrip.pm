@@ -11,6 +11,7 @@ my %arg_map = (
     '=' => '(..)(....)(..)',
     '@' => { format => '^(..)(..)(.*)', count => 2 },
     'T' => { format => '^(.*)', count => 0 },
+    "1\x1b" => { format => '^(.)(...)(.*)', count => 2 },
 );
 
 sub read {
@@ -34,6 +35,7 @@ sub read {
             my ( $command, $args ) = $command_line =~ m{^(\d*\D)(.*)}s;
 
             last if $command eq '#';
+#            warn "[$command] [$args]";
             next unless $command;
 
             my @args = _parse_args( $args, $arg_map{ $command } );
@@ -48,7 +50,7 @@ sub read {
 sub _parse_args {
     my $args = shift;
     my $format = shift || '(..)';
-    my $count  = 255;
+    my $count  = 2048;
     
     if( ref $format ) {
         $count  = $format->{ count };
