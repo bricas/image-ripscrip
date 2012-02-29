@@ -271,6 +271,21 @@ sub _command_F {    # flood fill
     $state->{ canvas }->fillToBorder( @args, $state->{ fill_color } );
 }
 
+sub _command_I {    # pie slice
+    my ( $self, @args ) = @_;
+    my $size = $args[ 4 ] * 2;
+    my $state = $self->state;
+    $state->{ canvas }->filledArc( @args[ 0, 1 ], $size, $size, @args[ 2, 3 ], $state->{ fill_color } );
+}
+
+sub _command_i {    # oval pie slice
+    my ( $self, @args ) = @_;
+    my $w = $args[ 4 ] * 2;
+    my $h = $args[ 5 ] * 2;
+    my $state = $self->state;
+    $state->{ canvas }->filledArc( @args[ 0, 1 ], $w, $h, @args[ 2, 3 ], $state->{ fill_color } );
+}
+
 sub _command_1C {   # copy to clipboard
     my ( $self, @args ) = @_;
 
