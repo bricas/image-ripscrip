@@ -5,12 +5,12 @@ use Carp 'croak';
 
 our $VERSION = '0.01';
 
-has 'commands' => ( is => 'rw', isa => 'ArrayRef', default => sub { [] } ) ;
+has 'commands' => ( is => 'rw', isa => 'ArrayRef', default => sub { [] } );
 
 my %arg_map = (
-    '=' => '(..)(....)(..)',
-    '@' => { format => '^(..)(..)(.*)', count => 2 },
-    'T' => { format => '^(.*)', count => 0 },
+    '='     => '(..)(....)(..)',
+    '@'     => { format => '^(..)(..)(.*)', count => 2 },
+    'T'     => { format => '^(.*)', count => 0 },
     "1\x1b" => { format => '^(.)(...)(.*)', count => 2 },
 );
 
@@ -34,12 +34,14 @@ sub read {
             my ( $command, $args ) = $command_line =~ m{^(\d*\D)(.*)}s;
 
             last if $command eq '#';
+
             # use Data::Dump 'dump'; warn dump( $command, $args );
             next unless $command;
 
             my @args = _parse_args( $args, $arg_map{ $command } );
 
-            push @{ $self->commands }, { command => $command, args => \@args };
+            push @{ $self->commands },
+                { command => $command, args => \@args };
         }
     }
 
@@ -47,17 +49,20 @@ sub read {
 }
 
 sub _parse_args {
-    my $args = shift;
+    my $args   = shift;
     my $format = shift || '(..)';
     my $count  = 2048;
-    
-    if( ref $format ) {
+
+    if ( ref $format ) {
         $count  = $format->{ count };
         $format = $format->{ format };
     }
 
-    return
-        map { $count-- > 0 ? ( Math::Base36::decode_base36( $_ ) . '' ) : $_ } $args =~ m{$format}g;
+    return map {
+        $count-- > 0
+            ? ( ( eval { Math::Base36::decode_base36( $_ ) } || 0 ) . '' )
+            : $_
+    } $args =~ m{$format}g;
 }
 
 sub _get_fh {
